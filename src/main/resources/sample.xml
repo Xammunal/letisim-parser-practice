@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BPSimData xmlns="http://www.bpsim.org/schemas/2.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 xsd/BPSim.xsd">
+    <Scenario id="Scenario_1" name="Test Scenario" author="Vanya">
+        <ScenarioParameters>
+        </ScenarioParameters>
+    </Scenario>
+</BPSimData>
