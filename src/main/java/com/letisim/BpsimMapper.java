@@ -1,8 +1,8 @@
 package com.letisim;
 
+import com.letisim.dto.LetisimScenarioDto;
 import org.bpsim.model.Scenario;
 
 public interface BpsimMapper {
-    // Заглушка для разраба мапперов
-    Object mapToDto(Scenario bpsimScenario);
+    LetisimScenarioDto mapToDto(Scenario bpsimScenario);
 }
