@@ -1,17 +1,5 @@
-# Сборка Maven
 target/
-*.jar
-*.war
-*.ear
-
-# Настройки IDE (IntelliJ IDEA, Eclipse, VS Code)
 .idea/
 *.iml
-.project
-.classpath
-.settings/
 .vscode/
-
-# Логи и временные файлы
-*.log
-/storage/
+.DS_Store
