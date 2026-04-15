@@ -2,12 +2,21 @@ package com.letisim;
 
 import org.bpsim.model.BPSimData;
 import java.io.InputStream;
-import java.util.concurrent.CompletableFuture;
 
+/**
+ * Контракт для парсинга BPSim XML-документов.
+ *
+ * <p>Реализация должна выполнять XSD-валидацию и JAXB-десериализацию,
+ * возвращая типизированный {@link BPSimData}.</p>
+ */
 public interface BpsimParser {
-    // Асинхронный метод парсинга (используется API)
-    CompletableFuture<BPSimData> parseBpsim(InputStream xmlStream);
 
-    // Синхронный метод парсинга (для обратной совместимости)
-    Object parse(InputStream xmlStream);
+    /**
+     * Парсит входящий XML-поток BPSim с XSD-валидацией.
+     *
+     * @param xmlStream входной поток с XML-документом BPSim
+     * @return десериализованный {@link BPSimData}
+     * @throws BpsimValidationException если XML не прошёл XSD-валидацию
+     */
+    BPSimData parseBpsim(InputStream xmlStream);
 }

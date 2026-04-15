@@ -1,18 +1,23 @@
 package com.letisim.mapper;
 
+import com.letisim.BpsimMapper;
 import com.letisim.dto.LetisimScenarioDto;
 import org.bpsim.model.Calendar;
 import org.bpsim.model.Scenario;
 import org.bpsim.model.ScenarioParameters;
 import org.bpsim.model.TimeUnit;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-public class BpsimMapperImpl implements com.letisim.BpsimMapper {
+/**
+ * Реализация маппера BPSim → LETISim DTO.
+ *
+ * <p>Преобразует JAXB-объекты {@link Scenario} в упрощённые
+ * DTO {@link LetisimScenarioDto} для движка LETISim.</p>
+ */
+public class BpsimMapperImpl implements BpsimMapper {
 
     @Override
     public LetisimScenarioDto mapToDto(Scenario bpsimScenario) {
