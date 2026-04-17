@@ -3,10 +3,7 @@ package com.letisim;
 import org.bpsim.model.BPSimData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -15,23 +12,19 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.CompletableFuture;
 
 /**
- * Spring-сервис для безопасного парсинга и строгой XSD-валидации
+ * Сервис для безопасного парсинга и строгой XSD-валидации
  * файлов BPSim 2.0.
  *
  * <p>Основные особенности:</p>
  * <ul>
- *   <li>JAXBContext создаётся один раз в {@code @PostConstruct} —
+ *   <li>JAXBContext создаётся один раз в конструкторе —
  *       это тяжёлая thread-safe операция, которую нельзя повторять при каждом вызове.</li>
  *   <li>Schema (XSD) компилируется один раз и переиспользуется.</li>
  *   <li>Unmarshaller создаётся на каждый вызов (он НЕ thread-safe).</li>
- *   <li>Метод {@link #parseBpsim(InputStream)} помечен {@code @Async} и
- *       возвращает {@link CompletableFuture} — парсинг выполняется в отдельном потоке.</li>
  * </ul>
  */
-@Service
 public class BpsimParserService implements BpsimParser {
 
     private static final Logger log = LoggerFactory.getLogger(BpsimParserService.class);
@@ -40,23 +33,21 @@ public class BpsimParserService implements BpsimParser {
     private static final String XSD_RESOURCE_PATH = "xsd/BPSim.xsd";
 
     /** Thread-safe: создаётся один раз */
-    private JAXBContext jaxbContext;
+    private final JAXBContext jaxbContext;
 
     /** Thread-safe: можно переиспользовать между потоками */
-    private Schema bpsimSchema;
+    private final Schema bpsimSchema;
 
     // ──────────────────────────────────────────────────────────────────────
-    //  Инициализация
+    //  Конструктор (инициализация)
     // ──────────────────────────────────────────────────────────────────────
 
     /**
-     * Инициализирует JAXBContext и компилирует XSD-схему один раз
-     * при старте контейнера Spring.
+     * Создаёт сервис, инициализируя JAXBContext и компилируя XSD-схему.
      *
      * @throws IllegalStateException если не удалось найти XSD или создать контекст.
      */
-    @PostConstruct
-    void init() {
+    public BpsimParserService() {
         log.info("Инициализация BpsimParserService...");
 
         try {
@@ -93,18 +84,18 @@ public class BpsimParserService implements BpsimParser {
     // ──────────────────────────────────────────────────────────────────────
 
     /**
-     * Асинхронно парсит входящий XML-поток BPSim с предварительной
+     * Парсит входящий XML-поток BPSim с предварительной
      * строгой XSD-валидацией.
      *
      * <p>Если XML не соответствует схеме BPSim.xsd — выбрасывается
      * {@link BpsimValidationException}.</p>
      *
      * @param xmlStream входной поток с XML-документом BPSim
-     * @return {@link CompletableFuture} с десериализованным {@link BPSimData}
+     * @return десериализованный {@link BPSimData}
      * @throws BpsimValidationException если XML не прошёл XSD-валидацию
      */
-    @Async
-    public CompletableFuture<BPSimData> parseBpsim(InputStream xmlStream) {
+    @Override
+    public BPSimData parseBpsim(InputStream xmlStream) {
         log.info("Начинаем парсинг BPSim XML...");
 
         try {
@@ -127,7 +118,7 @@ public class BpsimParserService implements BpsimParser {
             log.info("Парсинг завершён успешно ✅ Сценариев: {}",
                     data.getScenario().size());
 
-            return CompletableFuture.completedFuture(data);
+            return data;
 
         } catch (JAXBException e) {
             // JAXBException при включённой Schema => ошибка валидации XSD
@@ -138,17 +129,5 @@ public class BpsimParserService implements BpsimParser {
             log.error("Ошибка валидации ❌ {}", msg);
             throw new BpsimValidationException(msg, e);
         }
-    }
-
-    // ──────────────────────────────────────────────────────────────────────
-    //  Реализация интерфейса BpsimParser (обратная совместимость)
-    // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Синхронная обёртка, реализующая контракт интерфейса {@link BpsimParser}.
-     */
-    @Override
-    public Object parse(InputStream xmlStream) {
-        return parseBpsim(xmlStream).join();
     }
 }

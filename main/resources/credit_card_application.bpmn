@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:qbp="http://www.qbp-simulator.com/Schema201212"
+             exporter="ManualEditor"
+             exporterVersion="1.0"
+             id="Definitions_Extended"
+             targetNamespace="http://example.com/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath">
+
+  <process id="Process_Extended_Simulation" name="Расширенный процесс кредитования" isExecutable="false">
+
+    <startEvent id="StartEvent_1" name="Заявка получена">
+      <outgoing>Flow_To_Parallel</outgoing>
+    </startEvent>
+
+    <parallelGateway id="Gateway_Parallel" name="Параллельная проверка">
+      <incoming>Flow_To_Parallel</incoming>
+      <outgoing>Flow_Check_History</outgoing>
+      <outgoing>Flow_Wait_Timer</outgoing>
+    </parallelGateway>
+
+    <task id="Task_Check_History" name="Проверить кредитную историю">
+      <incoming>Flow_Check_History</incoming>
+      <outgoing>Flow_To_Merge</outgoing>
+    </task>
+
+    <intermediateCatchEvent id="Event_Timer_Wait" name="Ожидание справки (Таймер)">
+      <incoming>Flow_Wait_Timer</incoming>
+      <outgoing>Flow_After_Timer</outgoing>
+      <timerEventDefinition>
+        <timeDuration>P1D</timeDuration>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+
+    <exclusiveGateway id="Gateway_Exclusive" name="Одобрено? (XOR)">
+      <incoming>Flow_After_Timer</incoming>
+      <incoming>Flow_From_Merge</incoming>
+      <outgoing>Flow_Approve</outgoing>
+      <outgoing>Flow_Reject</outgoing>
+    </exclusiveGateway>
+
+    <task id="Task_Manual_Approval" name="Ручное согласование менеджером">
+      <incoming>Flow_Approve</incoming>
+      <outgoing>Flow_To_End</outgoing>
+    </task>
+
+    <task id="Task_Reject" name="Отказать клиенту">
+      <incoming>Flow_Reject</incoming>
+      <outgoing>Flow_To_End</outgoing>
+    </task>
+
+    <endEvent id="EndEvent_1" name="Процесс завершен">
+      <incoming>Flow_To_End</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_To_Parallel" sourceRef="StartEvent_1" targetRef="Gateway_Parallel" />
+    <sequenceFlow id="Flow_Check_History" sourceRef="Gateway_Parallel" targetRef="Task_Check_History" />
+    <sequenceFlow id="Flow_Wait_Timer" sourceRef="Gateway_Parallel" targetRef="Event_Timer_Wait" />
+    <sequenceFlow id="Flow_After_Timer" sourceRef="Event_Timer_Wait" targetRef="Gateway_Exclusive" />
+    <sequenceFlow id="Flow_To_Merge" sourceRef="Task_Check_History" targetRef="Gateway_Exclusive" />
+    <sequenceFlow id="Flow_From_Merge" sourceRef="Task_Check_History" targetRef="Gateway_Exclusive" />
+
+    <sequenceFlow id="Flow_Approve" name="Да" sourceRef="Gateway_Exclusive" targetRef="Task_Manual_Approval">
+      <conditionExpression xsi:type="tFormalExpression">0.8</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_Reject" name="Нет" sourceRef="Gateway_Exclusive" targetRef="Task_Reject">
+      <conditionExpression xsi:type="tFormalExpression">0.2</conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="Flow_To_End" sourceRef="Task_Manual_Approval" targetRef="EndEvent_1" />
+    <sequenceFlow id="Flow_To_End_Rej" sourceRef="Task_Reject" targetRef="EndEvent_1" />
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane bpmnElement="Process_Extended_Simulation" id="BPMNPlane_1">
+      <bpmndi:BPMNShape bpmnElement="StartEvent_1" id="StartEvent_1_gui">
+        <omgdc:Bounds height="30.0" width="30.0" x="100.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Gateway_Parallel" id="Gateway_Parallel_gui">
+        <omgdc:Bounds height="40.0" width="40.0" x="180.0" y="95.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Task_Check_History" id="Task_Check_History_gui">
+        <omgdc:Bounds height="80.0" width="100.0" x="260.0" y="50.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Event_Timer_Wait" id="Event_Timer_Wait_gui">
+        <omgdc:Bounds height="30.0" width="30.0" x="260.0" y="140.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Gateway_Exclusive" id="Gateway_Exclusive_gui">
+        <omgdc:Bounds height="40.0" width="40.0" x="400.0" y="95.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Task_Manual_Approval" id="Task_Manual_Approval_gui">
+        <omgdc:Bounds height="80.0" width="100.0" x="480.0" y="50.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Task_Reject" id="Task_Reject_gui">
+        <omgdc:Bounds height="80.0" width="100.0" x="480.0" y="140.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="EndEvent_1" id="EndEvent_1_gui">
+        <omgdc:Bounds height="30.0" width="30.0" x="620.0" y="100.0"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge bpmnElement="Flow_To_Parallel" id="Flow_To_Parallel_gui">
+        <omgdi:waypoint x="130.0" y="115.0"/>
+        <omgdi:waypoint x="180.0" y="115.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Check_History" id="Flow_Check_History_gui">
+        <omgdi:waypoint x="200.0" y="95.0"/>
+        <omgdi:waypoint x="200.0" y="90.0"/>
+        <omgdi:waypoint x="260.0" y="90.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Wait_Timer" id="Flow_Wait_Timer_gui">
+        <omgdi:waypoint x="200.0" y="135.0"/>
+        <omgdi:waypoint x="200.0" y="155.0"/>
+        <omgdi:waypoint x="260.0" y="155.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_After_Timer" id="Flow_After_Timer_gui">
+        <omgdi:waypoint x="290.0" y="155.0"/>
+        <omgdi:waypoint x="350.0" y="155.0"/>
+        <omgdi:waypoint x="350.0" y="135.0"/>
+        <omgdi:waypoint x="400.0" y="135.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_From_Merge" id="Flow_From_Merge_gui">
+        <omgdi:waypoint x="360.0" y="90.0"/>
+        <omgdi:waypoint x="400.0" y="90.0"/>
+        <omgdi:waypoint x="400.0" y="95.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Approve" id="Flow_Approve_gui">
+        <omgdi:waypoint x="420.0" y="95.0"/>
+        <omgdi:waypoint x="420.0" y="90.0"/>
+        <omgdi:waypoint x="480.0" y="90.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_Reject" id="Flow_Reject_gui">
+        <omgdi:waypoint x="420.0" y="135.0"/>
+        <omgdi:waypoint x="420.0" y="180.0"/>
+        <omgdi:waypoint x="480.0" y="180.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="Flow_To_End" id="Flow_To_End_gui">
+        <omgdi:waypoint x="580.0" y="90.0"/>
+        <omgdi:waypoint x="620.0" y="115.0"/>
+      </bpmndi:BPMNEdge>
+       <bpmndi:BPMNEdge bpmnElement="Flow_To_End_Rej" id="Flow_To_End_Rej_gui">
+        <omgdi:waypoint x="580.0" y="180.0"/>
+        <omgdi:waypoint x="635.0" y="180.0"/>
+        <omgdi:waypoint x="635.0" y="130.0"/>
+        <omgdi:waypoint x="620.0" y="130.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+  <qbp:processSimulationInfo id="SimConfig_Extended"
+                             processId="Process_Extended_Simulation"
+                             processInstances="100"
+                             startDateTime="2023-10-27T09:00:00.000Z"
+                             currency="EUR">
+
+    <qbp:arrivalRateDistribution type="EXPONENTIAL" mean="600" arg1="0" arg2="0"/>
+
+    <qbp:resources>
+      <qbp:resource id="Res_Clerk" name="Clerk" totalAmount="2" costPerHour="20.0" timetableId="DEFAULT_TIMETABLE"/>
+      <qbp:resource id="Res_Manager" name="Manager" totalAmount="1" costPerHour="50.0" timetableId="EXTENDED_TIMETABLE"/>
+    </qbp:resources>
+
+    <qbp:timetables>
+      <qbp:timetable id="DEFAULT_TIMETABLE" default="true" name="Standard 9-18">
+        <qbp:rules>
+          <qbp:rule fromTime="09:00:00.000+03:00" toTime="18:00:00.000+03:00" fromWeekDay="MONDAY" toWeekDay="FRIDAY"/>
+        </qbp:rules>
+      </qbp:timetable>
+      <qbp:timetable id="EXTENDED_TIMETABLE" default="false" name="Extended 8-20">
+        <qbp:rules>
+          <qbp:rule fromTime="08:00:00.000+03:00" toTime="20:00:00.000+03:00" fromWeekDay="MONDAY" toWeekDay="FRIDAY"/>
+        </qbp:rules>
+      </qbp:timetable>
+    </qbp:timetables>
+
+    <qbp:elements>
+      <qbp:element elementId="Task_Check_History" fixedCost="5.0">
+        <qbp:durationDistribution type="NORMAL" mean="300.0" arg1="60.0" arg2="0.0"/>
+        <qbp:resourceIds>
+          <qbp:resourceId>Res_Clerk</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+
+      <qbp:element elementId="Event_Timer_Wait" fixedCost="0.0">
+        <qbp:durationDistribution type="FIXED" mean="86400.0" arg1="0.0" arg2="0.0"/> <!-- 1 день в секундах -->
+      </qbp:element>
+
+      <qbp:element elementId="Task_Manual_Approval" fixedCost="10.0">
+        <qbp:durationDistribution type="NORMAL" mean="1200.0" arg1="300.0" arg2="0.0"/>
+        <qbp:resourceIds>
+          <qbp:resourceId>Res_Manager</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+
+       <qbp:element elementId="Task_Reject" fixedCost="0.0">
+        <qbp:durationDistribution type="FIXED" mean="10.0" arg1="0.0" arg2="0.0"/>
+        <qbp:resourceIds>
+          <qbp:resourceId>Res_Clerk</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+    </qbp:elements>
+
+    <qbp:sequenceFlows>
+      <qbp:sequenceFlow elementId="Flow_Approve" executionProbability="0.8"/>
+      <qbp:sequenceFlow elementId="Flow_Reject" executionProbability="0.2"/>
+    </qbp:sequenceFlows>
+
+  </qbp:processSimulationInfo>
+
+</definitions>
