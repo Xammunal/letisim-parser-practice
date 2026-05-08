@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpsim:BPSimData xmlns:bpsim="http://www.bpsim.org/schemas/2.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 xsd/BPSim.xsd">
+    <bpsim:Scenario id="Scenario_Onboarding" name="Процесс найма сотрудника (IT)" author="Команда LETISim" description="Симуляция загрузки HR отдела">
+        <bpsim:ScenarioParameters baseTimeUnit="hour" baseCurrencyUnit="USD" replication="20" traceOutput="true" />
+        <bpsim:ElementParameters id="Elem_Interview" elementRef="Task_Interview">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="1.5" standardDeviation="0.5"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:CostParameters>
+                <bpsim:UnitCost>
+                    <bpsim:FloatingParameter value="30.0"/>
+                </bpsim:UnitCost>
+            </bpsim:CostParameters>
+        </bpsim:ElementParameters>
+    </bpsim:Scenario>
+</bpsim:BPSimData>

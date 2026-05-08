@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpsim:BPSimData xmlns:bpsim="http://www.bpsim.org/schemas/2.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 xsd/BPSim.xsd">
+    <bpsim:Scenario id="Scenario_CreditCard" name="Процесс выдачи кредитной карты" author="Ivan">
+        <bpsim:ScenarioParameters baseTimeUnit="min" replication="10" seed="12345" traceOutput="true" />
+        <bpsim:ElementParameters id="Elem_CheckHistory" elementRef="Task_Check_History">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="15.0" standardDeviation="2.0"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:CostParameters>
+                <bpsim:UnitCost>
+                    <bpsim:FloatingParameter value="5.0"/>
+                </bpsim:UnitCost>
+            </bpsim:CostParameters>
+        </bpsim:ElementParameters>
+        <bpsim:ElementParameters id="Elem_Approve" elementRef="Gateway_Exclusive">
+            <bpsim:ControlParameters>
+                <bpsim:Probability>
+                    <bpsim:FloatingParameter value="0.8"/>
+                </bpsim:Probability>
+            </bpsim:ControlParameters>
+        </bpsim:ElementParameters>
+    </bpsim:Scenario>
+</bpsim:BPSimData>

@@ -2,31 +2,44 @@ package com.letisim;
 
 import com.letisim.dto.LetisimScenarioDto;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println("======================================================");
+        System.out.println("  ДЕМO: Интеграция BPSim-парсера и ядра LETISim BPMS  ");
+        System.out.println("======================================================");
+
         try {
-            System.out.println("Инициализация библиотеки...");
             BpsimParserFacade facade = new BpsimParserFacade();
+            LetisimEngineMock engineMock = new LetisimEngineMock();
 
-            // Указываем путь к твоему тестовому файлу из ресурсов
-            File xmlFile = new File("src/main/resources/sample.xml");
+            // Список наших подготовленных процессов
+            List<String> processFiles = Arrays.asList(
+                    "src/main/resources/process1_credit_card.bpsim",
+                    "src/main/resources/process2_loan_approval.bpsim",
+                    "src/main/resources/process3_employee_onboarding.bpsim"
+            );
 
-            System.out.println("Парсинг файла: " + xmlFile.getAbsolutePath());
-            List<LetisimScenarioDto> scenarios = facade.parse(xmlFile);
+            for (String filePath : processFiles) {
+                File xmlFile = new File(filePath);
+                System.out.println("\n>>> ПАРСИНГ ФАЙЛА: " + xmlFile.getName() + " <<<");
 
-            System.out.println("✅ Успешно! Найдено сценариев: " + scenarios.size());
+                // Шаг 1: Парсинг (работа библиотеки)
+                List<LetisimScenarioDto> scenarios = facade.parse(xmlFile);
 
-            for (LetisimScenarioDto dto : scenarios) {
-                System.out.println("ID: " + dto.getId());
-                System.out.println("Имя: " + dto.getName());
-                System.out.println("Ед. времени: " + dto.getBaseTimeUnit());
-                System.out.println("Кол-во элементов: " + dto.getElementParameterCount());
-                System.out.println("---");
+                // Шаг 2: Передача в движок (интеграция)
+                for (LetisimScenarioDto dto : scenarios) {
+                    engineMock.simulateExecution(dto);
+                }
             }
+
+            System.out.println("\n🎉 Демонстрация успешно завершена!");
+
         } catch (Exception e) {
             System.err.println("❌ Ошибка выполнения: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
