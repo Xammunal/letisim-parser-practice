@@ -35,6 +35,25 @@ public class LetisimEngineMock {
         }
 
         log.info("[LETISim Engine] ⚙️ Применение параметров элементов (найдено: {} элементов)", scenario.getElementParameterCount());
+        if (scenario.getElementParameters() != null) {
+            for (com.letisim.dto.ElementParameterDto ep : scenario.getElementParameters()) {
+                StringBuilder details = new StringBuilder();
+                if (ep.getDistributionType() != null) {
+                    details.append(String.format("Время: %s (Mean: %.1f) ", ep.getDistributionType(), ep.getDistributionMean() != null ? ep.getDistributionMean() : 0.0));
+                }
+                if (ep.getUnitCost() != null) {
+                    details.append(String.format("Стоимость: %.2f ", ep.getUnitCost()));
+                }
+                if (ep.getProbability() != null) {
+                    details.append(String.format("Вероятность: %.2f ", ep.getProbability()));
+                }
+                if (ep.getResourceRole() != null) {
+                    details.append(String.format("Ресурс: %s (Кол-во: %.1f) ", ep.getResourceRole(), ep.getResourceQuantity() != null ? ep.getResourceQuantity() : 1.0));
+                }
+                
+                log.info("  └─ Элемент [{}]: {}", ep.getElementRef() != null ? ep.getElementRef() : ep.getId(), details.toString());
+            }
+        }
 
         // Эмуляция "долгой" работы движка
         try {

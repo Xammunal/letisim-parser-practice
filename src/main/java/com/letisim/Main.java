@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Main {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
-        System.out.println("======================================================");
-        System.out.println("  ДЕМO: Интеграция BPSim-парсера и ядра LETISim BPMS  ");
-        System.out.println("======================================================");
+        log.info("======================================================");
+        log.info("  ДЕМO: Интеграция BPSim-парсера и ядра LETISim BPMS  ");
+        log.info("======================================================");
 
         try {
             BpsimParserFacade facade = new BpsimParserFacade();
@@ -24,7 +26,7 @@ public class Main {
 
             for (String filePath : processFiles) {
                 File xmlFile = new File(filePath);
-                System.out.println("\n>>> ПАРСИНГ ФАЙЛА: " + xmlFile.getName() + " <<<");
+                log.info("\n>>> ПАРСИНГ ФАЙЛА: " + xmlFile.getName() + " <<<");
 
                 // Шаг 1: Парсинг (работа библиотеки)
                 List<LetisimScenarioDto> scenarios = facade.parse(xmlFile);
@@ -35,11 +37,10 @@ public class Main {
                 }
             }
 
-            System.out.println("\n🎉 Демонстрация успешно завершена!");
+            log.info("\n🎉 Демонстрация успешно завершена!");
 
         } catch (Exception e) {
-            System.err.println("❌ Ошибка выполнения: " + e.getMessage());
-            e.printStackTrace();
+            log.error("❌ Ошибка выполнения: " + e.getMessage(), e);
         }
     }
 }

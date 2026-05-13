@@ -1,12 +1,13 @@
 package com.letisim.mapper;
 
 import com.letisim.BpsimMapper;
+import com.letisim.dto.ElementParameterDto;
 import com.letisim.dto.LetisimScenarioDto;
-import org.bpsim.model.Calendar;
+import org.bpsim.model.*;
 import org.bpsim.model.Scenario;
-import org.bpsim.model.ScenarioParameters;
-import org.bpsim.model.TimeUnit;
 
+import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,8 +50,19 @@ public class BpsimMapperImpl implements BpsimMapper {
             dto.setCalendarNames(Collections.emptyList());
         }
 
+        // ElementParameters — маппим каждый элемент в ElementParameterDto
         List<Scenario.ElementParameters> elements = bpsimScenario.getElementParameters();
         dto.setElementParameterCount(elements != null ? elements.size() : 0);
+
+        if (elements != null && !elements.isEmpty()) {
+            List<ElementParameterDto> elementDtos = new ArrayList<>();
+            for (Scenario.ElementParameters ep : elements) {
+                elementDtos.add(mapElementParameter(ep));
+            }
+            dto.setElementParameters(elementDtos);
+        } else {
+            dto.setElementParameters(Collections.emptyList());
+        }
 
         return dto;
     }
@@ -67,5 +79,118 @@ public class BpsimMapperImpl implements BpsimMapper {
 
         // JAXB генерирует Boolean (не boolean), поэтому нужна null-проверка
         dto.setTraceOutput(Boolean.TRUE.equals(sp.isTraceOutput()));
+    }
+
+    /**
+     * Маппит один JAXB ElementParameters в ElementParameterDto.
+     * Извлекает распределение из TimeParameters, стоимость из CostParameters
+     * и вероятность из ControlParameters.
+     */
+    private ElementParameterDto mapElementParameter(Scenario.ElementParameters ep) {
+        ElementParameterDto dto = new ElementParameterDto();
+
+        dto.setId(ep.getId());
+        dto.setElementRef(ep.getElementRef() != null ? ep.getElementRef().getLocalPart() : null);
+
+        // TimeParameters → ProcessingTime → Distribution
+        TimeParameters tp = ep.getTimeParameters();
+        if (tp != null && tp.getProcessingTime() != null) {
+            Parameter processingTime = tp.getProcessingTime();
+            List<JAXBElement<? extends ParameterValue>> values = processingTime.getParameterValue();
+            if (values != null && !values.isEmpty()) {
+                ParameterValue pv = values.get(0).getValue();
+                extractDistribution(dto, pv);
+            }
+        }
+
+        // CostParameters → UnitCost → FloatingParameter
+        CostParameters cp = ep.getCostParameters();
+        if (cp != null && cp.getUnitCost() != null) {
+            Parameter unitCost = cp.getUnitCost();
+            List<JAXBElement<? extends ParameterValue>> values = unitCost.getParameterValue();
+            if (values != null && !values.isEmpty()) {
+                ParameterValue pv = values.get(0).getValue();
+                if (pv instanceof FloatingParameter) {
+                    dto.setUnitCost(((FloatingParameter) pv).getValue());
+                }
+            }
+        }
+
+        // ControlParameters → Probability → FloatingParameter
+        ControlParameters ctrl = ep.getControlParameters();
+        if (ctrl != null && ctrl.getProbability() != null) {
+            Parameter prob = ctrl.getProbability();
+            List<JAXBElement<? extends ParameterValue>> values = prob.getParameterValue();
+            if (values != null && !values.isEmpty()) {
+                ParameterValue pv = values.get(0).getValue();
+                if (pv instanceof FloatingParameter) {
+                    dto.setProbability(((FloatingParameter) pv).getValue());
+                }
+            }
+        }
+
+        // ResourceParameters → Quantity, Role
+        ResourceParameters rp = ep.getResourceParameters();
+        if (rp != null) {
+            if (rp.getQuantity() != null) {
+                Parameter q = rp.getQuantity();
+                List<JAXBElement<? extends ParameterValue>> values = q.getParameterValue();
+                if (values != null && !values.isEmpty()) {
+                    ParameterValue pv = values.get(0).getValue();
+                    if (pv instanceof FloatingParameter) {
+                        dto.setResourceQuantity(((FloatingParameter) pv).getValue());
+                    } else if (pv instanceof NumericParameter) {
+                        dto.setResourceQuantity(Double.valueOf(((NumericParameter) pv).getValue()));
+                    }
+                }
+            }
+
+            if (rp.getRole() != null && !rp.getRole().isEmpty()) {
+                Parameter roleParam = rp.getRole().get(0);
+                List<JAXBElement<? extends ParameterValue>> values = roleParam.getParameterValue();
+                if (values != null && !values.isEmpty()) {
+                    ParameterValue pv = values.get(0).getValue();
+                    if (pv instanceof StringParameter) {
+                        dto.setResourceRole(((StringParameter) pv).getValue());
+                    }
+                }
+            }
+        }
+
+        return dto;
+    }
+
+    /**
+     * Извлекает параметры распределения из ParameterValue в DTO.
+     * Поддерживает NormalDistribution, UniformDistribution и другие.
+     */
+    private void extractDistribution(ElementParameterDto dto, ParameterValue pv) {
+        if (pv instanceof NormalDistribution) {
+            NormalDistribution nd = (NormalDistribution) pv;
+            dto.setDistributionType("NormalDistribution");
+            dto.setDistributionMean(nd.getMean());
+            dto.setDistributionStdDev(nd.getStandardDeviation());
+        } else if (pv instanceof UniformDistribution) {
+            UniformDistribution ud = (UniformDistribution) pv;
+            dto.setDistributionType("UniformDistribution");
+            dto.setDistributionMin(ud.getMin());
+            dto.setDistributionMax(ud.getMax());
+        } else if (pv instanceof TriangularDistribution) {
+            TriangularDistribution td = (TriangularDistribution) pv;
+            dto.setDistributionType("TriangularDistribution");
+            dto.setDistributionMin(td.getMin());
+            dto.setDistributionMax(td.getMax());
+            dto.setDistributionMean(td.getMode());
+        } else if (pv instanceof NegativeExponentialDistribution) {
+            NegativeExponentialDistribution ned = (NegativeExponentialDistribution) pv;
+            dto.setDistributionType("ExponentialDistribution");
+            dto.setDistributionMean(ned.getMean());
+        } else if (pv instanceof PoissonDistribution) {
+            PoissonDistribution pd = (PoissonDistribution) pv;
+            dto.setDistributionType("PoissonDistribution");
+            dto.setDistributionMean(pd.getMean());
+        } else {
+            dto.setDistributionType(pv.getClass().getSimpleName());
+        }
     }
 }
