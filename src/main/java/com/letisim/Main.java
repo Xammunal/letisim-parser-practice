@@ -1,46 +1,43 @@
 package com.letisim;
 
 import com.letisim.dto.LetisimScenarioDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Main.class);
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        log.info("======================================================");
-        log.info("  ДЕМO: Интеграция BPSim-парсера и ядра LETISim BPMS  ");
-        log.info("======================================================");
+        log.info("  LETISim: Модуль генерации аналитики Heatmap         ");
+
+        LetisimEngineMock engineMock = new LetisimEngineMock();
 
         try {
-            BpsimParserFacade facade = new BpsimParserFacade();
-            LetisimEngineMock engineMock = new LetisimEngineMock();
+            // ВАРИАНТ 1: Анализ внешнего файла конфигурации
+            String externalPath = "src/main/resources/strategy_10_fast_track.bpmn";
+            BpsimXmlAdapter adapter = new BpsimXmlAdapter();
+            LetisimScenarioDto externalScenario = adapter.parse(externalPath);
+            engineMock.simulateExecution(externalScenario);
 
-            // Список наших подготовленных процессов
-            List<String> processFiles = Arrays.asList(
-                    "src/main/resources/process1_credit_card.bpsim",
-                    "src/main/resources/process2_loan_approval.bpsim",
-                    "src/main/resources/process3_employee_onboarding.bpsim"
-            );
 
-            for (String filePath : processFiles) {
-                File xmlFile = new File(filePath);
-                log.info("\n>>> ПАРСИНГ ФАЙЛА: " + xmlFile.getName() + " <<<");
 
-                // Шаг 1: Парсинг (работа библиотеки)
-                List<LetisimScenarioDto> scenarios = facade.parse(xmlFile);
+//            // ВАРИАНТ 2: Анализ собственного локального BPMN-файла процесса
+//            String localPath = "src/main/resources/credit_card_application.bpmn";
+//            BpsimParserFacade facade = new BpsimParserFacade();
+//
+//            List<LetisimScenarioDto> localScenarios = facade.parse(new File(localPath));
+//            for (LetisimScenarioDto scenario : localScenarios) {
+//                engineMock.simulateExecution(scenario);
+//            }
 
-                // Шаг 2: Передача в движок (интеграция)
-                for (LetisimScenarioDto dto : scenarios) {
-                    engineMock.simulateExecution(dto);
-                }
-            }
 
-            log.info("\n🎉 Демонстрация успешно завершена!");
+            log.info("\nПайплайн симуляции успешно отработал.");
 
         } catch (Exception e) {
-            log.error("❌ Ошибка выполнения: " + e.getMessage(), e);
+            log.error("Критическая ошибка выполнения: " + e.getMessage(), e);
         }
     }
 }

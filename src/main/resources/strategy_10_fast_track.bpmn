@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:qbp="http://www.qbp-simulator.com/Schema201212" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_FastTrack" targetNamespace="http://example.com/business-strategies">
+  <process id="Process_Credit_Strategy" name="Fast Track Credit Strategy" isExecutable="false">
+    <startEvent id="Start_Request" name="Request received">
+      <outgoing>F_Start_Docs</outgoing>
+    </startEvent>
+    <task id="Task_Docs" name="Validate documents">
+      <incoming>F_Start_Docs</incoming>
+      <outgoing>F_Docs_Risk</outgoing>
+    </task>
+    <task id="Task_Risk" name="Score risk automatically">
+      <incoming>F_Docs_Risk</incoming>
+      <outgoing>F_Risk_Decision</outgoing>
+    </task>
+    <exclusiveGateway id="Gateway_Decision" name="Approved?">
+      <incoming>F_Risk_Decision</incoming>
+      <outgoing>F_Approve</outgoing>
+      <outgoing>F_Reject</outgoing>
+    </exclusiveGateway>
+    <task id="Task_Manual" name="Manual approval">
+      <incoming>F_Approve</incoming>
+      <outgoing>F_Manual_Offer</outgoing>
+    </task>
+    <task id="Task_Reject" name="Notify rejection">
+      <incoming>F_Reject</incoming>
+      <outgoing>F_Reject_End</outgoing>
+    </task>
+    <task id="Task_Offer" name="Issue offer">
+      <incoming>F_Manual_Offer</incoming>
+      <outgoing>F_Offer_End</outgoing>
+    </task>
+    <endEvent id="End_Completed" name="Process completed">
+      <incoming>F_Reject_End</incoming>
+      <incoming>F_Offer_End</incoming>
+    </endEvent>
+    <sequenceFlow id="F_Start_Docs" sourceRef="Start_Request" targetRef="Task_Docs" />
+    <sequenceFlow id="F_Docs_Risk" sourceRef="Task_Docs" targetRef="Task_Risk" />
+    <sequenceFlow id="F_Risk_Decision" sourceRef="Task_Risk" targetRef="Gateway_Decision" />
+    <sequenceFlow id="F_Approve" name="approve" sourceRef="Gateway_Decision" targetRef="Task_Manual">
+      <conditionExpression xsi:type="tFormalExpression">0.84</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="F_Reject" name="reject" sourceRef="Gateway_Decision" targetRef="Task_Reject">
+      <conditionExpression xsi:type="tFormalExpression">0.16</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="F_Manual_Offer" sourceRef="Task_Manual" targetRef="Task_Offer" />
+    <sequenceFlow id="F_Reject_End" sourceRef="Task_Reject" targetRef="End_Completed" />
+    <sequenceFlow id="F_Offer_End" sourceRef="Task_Offer" targetRef="End_Completed" />
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_FastTrack">
+    <bpmndi:BPMNPlane id="BPMNPlane_FastTrack" bpmnElement="Process_Credit_Strategy">
+      <bpmndi:BPMNShape id="Start_Request_di" bpmnElement="Start_Request">
+        <dc:Bounds x="120" y="190" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Docs_di" bpmnElement="Task_Docs">
+        <dc:Bounds x="220" y="168" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Risk_di" bpmnElement="Task_Risk">
+        <dc:Bounds x="400" y="168" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Decision_di" bpmnElement="Gateway_Decision" isMarkerVisible="true">
+        <dc:Bounds x="610" y="183" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Manual_di" bpmnElement="Task_Manual">
+        <dc:Bounds x="730" y="112" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Reject_di" bpmnElement="Task_Reject">
+        <dc:Bounds x="730" y="258" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Offer_di" bpmnElement="Task_Offer">
+        <dc:Bounds x="930" y="112" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Completed_di" bpmnElement="End_Completed">
+        <dc:Bounds x="1120" y="190" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F_Start_Docs_di" bpmnElement="F_Start_Docs">
+        <di:waypoint x="156" y="208" />
+        <di:waypoint x="220" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Docs_Risk_di" bpmnElement="F_Docs_Risk">
+        <di:waypoint x="340" y="208" />
+        <di:waypoint x="400" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Risk_Decision_di" bpmnElement="F_Risk_Decision">
+        <di:waypoint x="540" y="208" />
+        <di:waypoint x="610" y="208" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Approve_di" bpmnElement="F_Approve">
+        <di:waypoint x="635" y="183" />
+        <di:waypoint x="635" y="152" />
+        <di:waypoint x="730" y="152" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Reject_di" bpmnElement="F_Reject">
+        <di:waypoint x="635" y="233" />
+        <di:waypoint x="635" y="298" />
+        <di:waypoint x="730" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Manual_Offer_di" bpmnElement="F_Manual_Offer">
+        <di:waypoint x="850" y="152" />
+        <di:waypoint x="930" y="152" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Reject_End_di" bpmnElement="F_Reject_End">
+        <di:waypoint x="850" y="298" />
+        <di:waypoint x="1138" y="298" />
+        <di:waypoint x="1138" y="226" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_Offer_End_di" bpmnElement="F_Offer_End">
+        <di:waypoint x="1050" y="152" />
+        <di:waypoint x="1138" y="152" />
+        <di:waypoint x="1138" y="190" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <qbp:processSimulationInfo id="qbp_17fde02a-0de2-4279-aa4a-80da8d3d092c" processId="Process_Credit_Strategy" processInstances="100" startDateTime="2026-05-22T11:49:37.9031416Z" currency="USD">
+    <qbp:arrivalRateDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+    <qbp:timetables>
+      <qbp:timetable id="DEFAULT_TIMETABLE" default="true">
+        <qbp:rules>
+          <qbp:rule fromTime="00:00:00.000+00:00" toTime="23:59:59.999+00:00" fromWeekDay="MONDAY" toWeekDay="SUNDAY" />
+        </qbp:rules>
+      </qbp:timetable>
+    </qbp:timetables>
+    <qbp:resources>
+      <qbp:resource id="qbp_default_resource" name="Default resource" totalAmount="1" costPerHour="0" timetableId="DEFAULT_TIMETABLE" />
+    </qbp:resources>
+    <qbp:elements>
+      <qbp:element id="qbp_579d208e-8195-4cf8-8945-1ba9421d121d" elementId="Task_Docs" fixedCost="0">
+        <qbp:durationDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+        <qbp:resourceIds>
+          <qbp:resourceId>qbp_default_resource</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+      <qbp:element id="qbp_da1968f4-5c11-4190-ab03-b392171ea97e" elementId="Task_Risk" fixedCost="0">
+        <qbp:durationDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+        <qbp:resourceIds>
+          <qbp:resourceId>qbp_default_resource</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+      <qbp:element id="qbp_2626587a-54b6-4f7c-b150-2acbad0f0499" elementId="Task_Manual" fixedCost="0">
+        <qbp:durationDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+        <qbp:resourceIds>
+          <qbp:resourceId>qbp_default_resource</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+      <qbp:element id="qbp_eec0b51b-7794-449b-9268-80057e138ca9" elementId="Task_Reject" fixedCost="0">
+        <qbp:durationDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+        <qbp:resourceIds>
+          <qbp:resourceId>qbp_default_resource</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+      <qbp:element id="qbp_feeb0fd2-46e1-48cd-a61f-977cd6a0d235" elementId="Task_Offer" fixedCost="0">
+        <qbp:durationDistribution type="FIXED" mean="60" arg1="0" arg2="0" />
+        <qbp:resourceIds>
+          <qbp:resourceId>qbp_default_resource</qbp:resourceId>
+        </qbp:resourceIds>
+      </qbp:element>
+    </qbp:elements>
+    <qbp:sequenceFlows>
+      <qbp:sequenceFlow elementId="F_Start_Docs" executionProbability="1.0" />
+      <qbp:sequenceFlow elementId="F_Docs_Risk" executionProbability="1.0" />
+      <qbp:sequenceFlow elementId="F_Risk_Decision" executionProbability="1.0" />
+      <qbp:sequenceFlow elementId="F_Approve" executionProbability="0.84" />
+      <qbp:sequenceFlow elementId="F_Reject" executionProbability="0.16" />
+      <qbp:sequenceFlow elementId="F_Manual_Offer" executionProbability="1.0" />
+      <qbp:sequenceFlow elementId="F_Reject_End" executionProbability="1.0" />
+      <qbp:sequenceFlow elementId="F_Offer_End" executionProbability="1.0" />
+    </qbp:sequenceFlows>
+  </qbp:processSimulationInfo>
+  <bpsim:BPSimData xmlns:bpsim="http://www.bpsim.org/schemas/2.0" xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 bpsim.xsd">
+    <bpsim:Scenario id="scenario_be97dda0-8fa1-435c-92c3-9645a889c10a" name="Default Scenario">
+      <bpsim:ScenarioParameters baseCurrency="USD" baseTimeUnit="HOURS" processInstances="100">
+        <bpsim:Duration>
+          <bpsim:FloatingParameter>
+            <bpsim:Value>24.0</bpsim:Value>
+          </bpsim:FloatingParameter>
+        </bpsim:Duration>
+        <bpsim:WarmupPeriod>
+          <bpsim:FloatingParameter>
+            <bpsim:Value>0.0</bpsim:Value>
+          </bpsim:FloatingParameter>
+        </bpsim:WarmupPeriod>
+        <bpsim:ResultInterval>
+          <bpsim:FloatingParameter>
+            <bpsim:Value>1.0</bpsim:Value>
+          </bpsim:FloatingParameter>
+        </bpsim:ResultInterval>
+        <bpsim:CumulativeResults>true</bpsim:CumulativeResults>
+      </bpsim:ScenarioParameters>
+      <bpsim:ResourceParameters>
+        <bpsim:ResourceParameter name="OperatorTeam" resourceId="Res_Operator">
+          <bpsim:Quantity>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>1</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:Quantity>
+          <bpsim:CalendarRef>WORK_CAL</bpsim:CalendarRef>
+          <bpsim:CostPerHour>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>7</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:CostPerHour>
+        </bpsim:ResourceParameter>
+        <bpsim:ResourceParameter name="RiskEngine" resourceId="Res_Risk">
+          <bpsim:Quantity>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>1</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:Quantity>
+          <bpsim:CalendarRef>WORK_CAL</bpsim:CalendarRef>
+          <bpsim:CostPerHour>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>7</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:CostPerHour>
+        </bpsim:ResourceParameter>
+        <bpsim:ResourceParameter name="ManagerTeam" resourceId="Res_Manager">
+          <bpsim:Quantity>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>1</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:Quantity>
+          <bpsim:CalendarRef>WORK_CAL</bpsim:CalendarRef>
+          <bpsim:CostPerHour>
+            <bpsim:FloatingParameter>
+              <bpsim:Value>8</bpsim:Value>
+            </bpsim:FloatingParameter>
+          </bpsim:CostPerHour>
+        </bpsim:ResourceParameter>
+      </bpsim:ResourceParameters>
+      <bpsim:ElementParameters>
+        <bpsim:ElementParameter elementRef="Task_Risk">
+          <bpsim:TimeParameters>
+            <bpsim:Duration>
+              <bpsim:FloatingParameter>
+                <bpsim:BetaDistribution alpha="3.0" beta="3.0" />
+              </bpsim:FloatingParameter>
+            </bpsim:Duration>
+          </bpsim:TimeParameters>
+          <bpsim:CostParameters>
+            <bpsim:FixedCost>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>33</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:FixedCost>
+          </bpsim:CostParameters>
+          <bpsim:ResourceParameters>
+            <bpsim:ResourceAssignmentExpression>
+              <bpsim:Expression>
+                <bpsim:StringParameter>
+                  <bpsim:Value>Res_Operator</bpsim:Value>
+                </bpsim:StringParameter>
+              </bpsim:Expression>
+            </bpsim:ResourceAssignmentExpression>
+          </bpsim:ResourceParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="Task_Reject">
+          <bpsim:TimeParameters>
+            <bpsim:Duration>
+              <bpsim:FloatingParameter>
+                <bpsim:LogNormalDistribution mean="7.0" standardDeviation="2.0" />
+              </bpsim:FloatingParameter>
+            </bpsim:Duration>
+          </bpsim:TimeParameters>
+          <bpsim:CostParameters>
+            <bpsim:FixedCost>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>22</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:FixedCost>
+          </bpsim:CostParameters>
+          <bpsim:ResourceParameters>
+            <bpsim:ResourceAssignmentExpression>
+              <bpsim:Expression>
+                <bpsim:StringParameter>
+                  <bpsim:Value>Res_Risk</bpsim:Value>
+                </bpsim:StringParameter>
+              </bpsim:Expression>
+            </bpsim:ResourceAssignmentExpression>
+          </bpsim:ResourceParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="Task_Manual">
+          <bpsim:TimeParameters>
+            <bpsim:Duration>
+              <bpsim:FloatingParameter>
+                <bpsim:GammaDistribution scale="7.0" shape="7.0" />
+              </bpsim:FloatingParameter>
+            </bpsim:Duration>
+          </bpsim:TimeParameters>
+          <bpsim:CostParameters>
+            <bpsim:FixedCost>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>8</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:FixedCost>
+          </bpsim:CostParameters>
+          <bpsim:ResourceParameters>
+            <bpsim:ResourceAssignmentExpression>
+              <bpsim:Expression>
+                <bpsim:StringParameter>
+                  <bpsim:Value>Res_Manager</bpsim:Value>
+                </bpsim:StringParameter>
+              </bpsim:Expression>
+            </bpsim:ResourceAssignmentExpression>
+          </bpsim:ResourceParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="Task_Offer">
+          <bpsim:TimeParameters>
+            <bpsim:Duration>
+              <bpsim:FloatingParameter>
+                <bpsim:ErlangDistribution k="8" mean="4.0" />
+              </bpsim:FloatingParameter>
+            </bpsim:Duration>
+          </bpsim:TimeParameters>
+          <bpsim:CostParameters>
+            <bpsim:FixedCost>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>55</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:FixedCost>
+          </bpsim:CostParameters>
+          <bpsim:ResourceParameters>
+            <bpsim:ResourceAssignmentExpression>
+              <bpsim:Expression>
+                <bpsim:StringParameter>
+                  <bpsim:Value>Res_Risk</bpsim:Value>
+                </bpsim:StringParameter>
+              </bpsim:Expression>
+            </bpsim:ResourceAssignmentExpression>
+          </bpsim:ResourceParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="Task_Docs">
+          <bpsim:TimeParameters>
+            <bpsim:Duration>
+              <bpsim:FloatingParameter>
+                <bpsim:PoissonDistribution mean="7.0" />
+              </bpsim:FloatingParameter>
+            </bpsim:Duration>
+          </bpsim:TimeParameters>
+          <bpsim:CostParameters>
+            <bpsim:FixedCost>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>76</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:FixedCost>
+          </bpsim:CostParameters>
+          <bpsim:ResourceParameters>
+            <bpsim:ResourceAssignmentExpression>
+              <bpsim:Expression>
+                <bpsim:StringParameter>
+                  <bpsim:Value>Res_Manager</bpsim:Value>
+                </bpsim:StringParameter>
+              </bpsim:Expression>
+            </bpsim:ResourceAssignmentExpression>
+          </bpsim:ResourceParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="F_Approve">
+          <bpsim:ControlParameters>
+            <bpsim:Probability>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>0.84</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:Probability>
+          </bpsim:ControlParameters>
+        </bpsim:ElementParameter>
+        <bpsim:ElementParameter elementRef="F_Reject">
+          <bpsim:ControlParameters>
+            <bpsim:Probability>
+              <bpsim:FloatingParameter>
+                <bpsim:Value>0.16</bpsim:Value>
+              </bpsim:FloatingParameter>
+            </bpsim:Probability>
+          </bpsim:ControlParameters>
+        </bpsim:ElementParameter>
+      </bpsim:ElementParameters>
+      <bpsim:CalendarParameters>
+        <bpsim:CalendarParameter calendarId="WORK_CAL" name="WORK_CAL">
+          <bpsim:AvailableTime>
+            <bpsim:Duration>P1W</bpsim:Duration>
+            <bpsim:TimeTable>
+              <bpsim:TimeSegment>
+                <bpsim:StartingTime>P0DT7H0M0S</bpsim:StartingTime>
+                <bpsim:Duration>PT11H</bpsim:Duration>
+                <bpsim:WeekDay>MONDAY</bpsim:WeekDay>
+              </bpsim:TimeSegment>
+            </bpsim:TimeTable>
+          </bpsim:AvailableTime>
+        </bpsim:CalendarParameter>
+      </bpsim:CalendarParameters>
+    </bpsim:Scenario>
+  </bpsim:BPSimData>
+</definitions>

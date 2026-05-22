@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpsim:BPSimData xmlns:bpsim="http://www.bpsim.org/schemas/2.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 xsd/BPSim.xsd">
+    <bpsim:Scenario id="Scenario_CC_Stress" name="Кредитная карта: Стресс-тест (Высокие отказы)" author="Команда LETISim">
+        <bpsim:ScenarioParameters baseTimeUnit="min" baseCurrencyUnit="RUB" replication="100" traceOutput="true" />
+
+        <bpsim:ElementParameters id="Elem_Check" elementRef="Task_Check_History">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="45.0" standardDeviation="15.0"/> </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:ResourceParameters>
+                <bpsim:Role><bpsim:StringParameter value="Младший_Клерк"/></bpsim:Role>
+            </bpsim:ResourceParameters>
+            <bpsim:CostParameters>
+                <bpsim:UnitCost>
+                    <bpsim:FloatingParameter value="150.0"/>
+                </bpsim:UnitCost>
+            </bpsim:CostParameters>
+        </bpsim:ElementParameters>
+
+        <bpsim:ElementParameters id="Elem_Wait" elementRef="Event_Timer_Wait">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="1440.0" standardDeviation="0.0"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+        </bpsim:ElementParameters>
+
+        <bpsim:ElementParameters id="Elem_Approval" elementRef="Task_Manual_Approval">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="30.0" standardDeviation="10.0"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:ControlParameters>
+                <bpsim:Probability>
+                    <bpsim:FloatingParameter value="0.4"/>
+                </bpsim:Probability>
+            </bpsim:ControlParameters>
+            <bpsim:ResourceParameters>
+                <bpsim:Role><bpsim:StringParameter value="Старший_Менеджер"/></bpsim:Role>
+            </bpsim:ResourceParameters>
+            <bpsim:CostParameters>
+                <bpsim:UnitCost>
+                    <bpsim:FloatingParameter value="600.0"/>
+                </bpsim:UnitCost>
+            </bpsim:CostParameters>
+        </bpsim:ElementParameters>
+
+        <bpsim:ElementParameters id="Elem_Reject" elementRef="Task_Reject">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="5.0" standardDeviation="1.0"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:ControlParameters>
+                <bpsim:Probability>
+                    <bpsim:FloatingParameter value="0.6"/>
+                </bpsim:Probability>
+            </bpsim:ControlParameters>
+            <bpsim:ResourceParameters>
+                <bpsim:Role><bpsim:StringParameter value="Младший_Клерк"/></bpsim:Role>
+            </bpsim:ResourceParameters>
+        </bpsim:ElementParameters>
+
+    </bpsim:Scenario>
+</bpsim:BPSimData>
