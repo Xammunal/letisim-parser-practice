@@ -25,7 +25,7 @@ public class LetisimEngineMock {
     public void simulateExecution(LetisimScenarioDto scenario) {
         log.info("[LETISim Engine] Генерация Heatmap CSV для сценария: '{}'", scenario.getName());
 
-        int replications = scenario.getReplication() != null ? scenario.getReplication() : 1;
+        int replications = scenario.getReplication() != null ? scenario.getReplication() : 100;
         if (scenario.getSeed() != null) {
             random.setSeed(scenario.getSeed());
         }

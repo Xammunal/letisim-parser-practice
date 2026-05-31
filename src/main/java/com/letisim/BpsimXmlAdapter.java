@@ -14,12 +14,31 @@ public class BpsimXmlAdapter {
 
     public LetisimScenarioDto parse(String filePath) {
         LetisimScenarioDto dto = new LetisimScenarioDto();
-        dto.setName("Fast Track Strategy");
-        dto.setReplication(100);
         dto.setElementParameters(new ArrayList<>());
 
         try {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(filePath));
+
+            // 1. Динамически читаем имя сценария
+            NodeList scenarios = doc.getElementsByTagName("bpsim:Scenario");
+            if (scenarios.getLength() > 0) {
+                dto.setName(((Element) scenarios.item(0)).getAttribute("name"));
+            } else {
+                dto.setName("Imported Vendor Scenario");
+            }
+
+            // 2. Ловим "мутантский" атрибут processInstances вместо стандартного replication
+            NodeList params = doc.getElementsByTagName("bpsim:ScenarioParameters");
+            if (params.getLength() > 0) {
+                Element paramEl = (Element) params.item(0);
+                if (paramEl.hasAttribute("processInstances")) {
+                    dto.setReplication(Integer.parseInt(paramEl.getAttribute("processInstances")));
+                } else {
+                    dto.setReplication(1);
+                }
+            }
+
+            // 3. Вытаскиваем кривые нестандартные теги ElementParameter (в единственном числе)
             NodeList elements = doc.getElementsByTagName("bpsim:ElementParameter");
 
             for (int i = 0; i < elements.getLength(); i++) {
@@ -48,21 +67,29 @@ public class BpsimXmlAdapter {
         if (nodes.getLength() == 0) return null;
         Element node = (Element) nodes.item(0);
 
+        // Поиск фиксированного значения (например, FixedCost или Probability)
         NodeList values = node.getElementsByTagName("bpsim:Value");
         if (values.getLength() > 0) {
             return Double.parseDouble(values.item(0).getTextContent());
         }
 
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            if (children.item(i) instanceof Element) {
-                Element child = (Element) children.item(i);
-                if (child.hasAttribute("mean")) {
-                    return Double.parseDouble(child.getAttribute("mean"));
+        // Пробиваем глубокие обертки генератора, чтобы найти распределения
+        String[] distTypes = {"LogNormalDistribution", "GammaDistribution", "ErlangDistribution", "PoissonDistribution", "BetaDistribution"};
+        for (String distType : distTypes) {
+            NodeList distNodes = node.getElementsByTagName("bpsim:" + distType);
+            if (distNodes.getLength() > 0) {
+                Element distNode = (Element) distNodes.item(0);
+                if (distNode.hasAttribute("mean")) {
+                    return Double.parseDouble(distNode.getAttribute("mean"));
                 }
-                if (child.hasAttribute("scale") && child.hasAttribute("shape")) {
-                    return Double.parseDouble(child.getAttribute("scale")) * Double.parseDouble(child.getAttribute("shape"));
+                // Для гаммы или беты берем scale/alpha как базовое значение для симуляции
+                if (distNode.hasAttribute("scale")) {
+                    return Double.parseDouble(distNode.getAttribute("scale"));
                 }
+                if (distNode.hasAttribute("alpha")) {
+                    return Double.parseDouble(distNode.getAttribute("alpha"));
+                }
+                return 5.0; // Fallback если параметры вообще другие
             }
         }
         return 0.0;

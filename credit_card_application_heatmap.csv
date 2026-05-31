@@ -1,8 +1,8 @@
 elementid,executiontime,cost,resourceutilization
-Task_Reject,0,2200,100
-Task_Docs,0,7600,100
-Task_Risk,0,3300,100
-F_Reject,0,0,10
-Task_Manual,0,800,100
-Task_Offer,0,5500,100
-F_Approve,0,0,78
+Task_Reject,700,2200,100
+Task_Docs,700,7600,100
+Task_Risk,300,3300,100
+F_Reject,0,0,15
+Task_Manual,700,800,100
+Task_Offer,400,5500,100
+F_Approve,0,0,79

@@ -4,9 +4,6 @@ import com.letisim.dto.LetisimScenarioDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.List;
-
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
@@ -15,24 +12,18 @@ public class Main {
 
         LetisimEngineMock engineMock = new LetisimEngineMock();
 
+        // Используем DOM-адаптер специально для кривых файлов сторонних вендоров
+        BpsimXmlAdapter vendorAdapter = new BpsimXmlAdapter();
+
         try {
-            // ВАРИАНТ 1: Анализ внешнего файла конфигурации
+            log.info("Парсинг файла через Vendor DOM Adapter...");
             String externalPath = "src/main/resources/strategy_10_fast_track.bpmn";
-            BpsimXmlAdapter adapter = new BpsimXmlAdapter();
-            LetisimScenarioDto externalScenario = adapter.parse(externalPath);
-            engineMock.simulateExecution(externalScenario);
+            LetisimScenarioDto scenario = vendorAdapter.parse(externalPath);
 
+            log.info("Успешно извлечен сценарий: '{}', Репликаций: {}", scenario.getName(), scenario.getReplication());
 
-
-//            // ВАРИАНТ 2: Анализ собственного локального BPMN-файла процесса
-//            String localPath = "src/main/resources/credit_card_application.bpmn";
-//            BpsimParserFacade facade = new BpsimParserFacade();
-//
-//            List<LetisimScenarioDto> localScenarios = facade.parse(new File(localPath));
-//            for (LetisimScenarioDto scenario : localScenarios) {
-//                engineMock.simulateExecution(scenario);
-//            }
-
+            // Симулируем!
+            engineMock.simulateExecution(scenario);
 
             log.info("\nПайплайн симуляции успешно отработал.");
 
