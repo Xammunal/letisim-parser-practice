@@ -1,32 +1,34 @@
 package com.letisim;
 
 import com.letisim.dto.LetisimScenarioDto;
-import java.io.File;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
+        log.info("  LETISim: Модуль генерации аналитики Heatmap         ");
+
+        LetisimEngineMock engineMock = new LetisimEngineMock();
+
+        // Используем DOM-адаптер специально для кривых файлов сторонних вендоров
+        BpsimXmlAdapter vendorAdapter = new BpsimXmlAdapter();
+
         try {
-            System.out.println("Инициализация библиотеки...");
-            BpsimParserFacade facade = new BpsimParserFacade();
+            log.info("Парсинг файла через Vendor DOM Adapter...");
+            String externalPath = "src/main/resources/strategy_10_fast_track.bpmn";
+            LetisimScenarioDto scenario = vendorAdapter.parse(externalPath);
 
-            // Указываем путь к твоему тестовому файлу из ресурсов
-            File xmlFile = new File("src/main/resources/sample.xml");
+            log.info("Успешно извлечен сценарий: '{}', Репликаций: {}", scenario.getName(), scenario.getReplication());
 
-            System.out.println("Парсинг файла: " + xmlFile.getAbsolutePath());
-            List<LetisimScenarioDto> scenarios = facade.parse(xmlFile);
+            // Симулируем!
+            engineMock.simulateExecution(scenario);
 
-            System.out.println("✅ Успешно! Найдено сценариев: " + scenarios.size());
+            log.info("\nПайплайн симуляции успешно отработал.");
 
-            for (LetisimScenarioDto dto : scenarios) {
-                System.out.println("ID: " + dto.getId());
-                System.out.println("Имя: " + dto.getName());
-                System.out.println("Ед. времени: " + dto.getBaseTimeUnit());
-                System.out.println("Кол-во элементов: " + dto.getElementParameterCount());
-                System.out.println("---");
-            }
         } catch (Exception e) {
-            System.err.println("❌ Ошибка выполнения: " + e.getMessage());
+            log.error("Критическая ошибка выполнения: " + e.getMessage(), e);
         }
     }
 }

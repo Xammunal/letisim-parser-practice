@@ -22,6 +22,7 @@ public class LetisimScenarioDto {
     // Агрегат вложенных элементов
     private List<String> calendarNames;
     private int elementParameterCount;
+    private List<ElementParameterDto> elementParameters;
 
     public LetisimScenarioDto() {}
 
@@ -60,6 +61,9 @@ public class LetisimScenarioDto {
 
     public int getElementParameterCount() { return elementParameterCount; }
     public void setElementParameterCount(int elementParameterCount) { this.elementParameterCount = elementParameterCount; }
+
+    public List<ElementParameterDto> getElementParameters() { return elementParameters; }
+    public void setElementParameters(List<ElementParameterDto> elementParameters) { this.elementParameters = elementParameters; }
 
     @Override
     public String toString() {

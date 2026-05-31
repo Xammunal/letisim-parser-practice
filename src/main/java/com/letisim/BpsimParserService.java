@@ -14,16 +14,11 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Сервис для безопасного парсинга и строгой XSD-валидации
- * файлов BPSim 2.0.
+ * Сервис для безопасного парсинга файлов BPSim 2.0.
  *
- * <p>Основные особенности:</p>
- * <ul>
- *   <li>JAXBContext создаётся один раз в конструкторе —
- *       это тяжёлая thread-safe операция, которую нельзя повторять при каждом вызове.</li>
- *   <li>Schema (XSD) компилируется один раз и переиспользуется.</li>
- *   <li>Unmarshaller создаётся на каждый вызов (он НЕ thread-safe).</li>
- * </ul>
+ * <p>ВНИМАНИЕ (Вариант Б): Строгая XSD-валидация временно отключена
+ * для обеспечения совместимости с некорректными (но одобренными)
+ * файлами из сторонних редакторов (мягкий парсинг).</p>
  */
 public class BpsimParserService implements BpsimParser {
 
@@ -32,26 +27,13 @@ public class BpsimParserService implements BpsimParser {
     /** XSD-файл внутри classpath (src/main/resources/xsd/BPSim.xsd) */
     private static final String XSD_RESOURCE_PATH = "xsd/BPSim.xsd";
 
-    /** Thread-safe: создаётся один раз */
     private final JAXBContext jaxbContext;
-
-    /** Thread-safe: можно переиспользовать между потоками */
     private final Schema bpsimSchema;
 
-    // ──────────────────────────────────────────────────────────────────────
-    //  Конструктор (инициализация)
-    // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Создаёт сервис, инициализируя JAXBContext и компилируя XSD-схему.
-     *
-     * @throws IllegalStateException если не удалось найти XSD или создать контекст.
-     */
     public BpsimParserService() {
         log.info("Инициализация BpsimParserService...");
 
         try {
-            // 1. JAXBContext — тяжёлый объект, создаём один раз
             this.jaxbContext = JAXBContext.newInstance(BPSimData.class);
             log.info("JAXBContext создан для {}", BPSimData.class.getName());
         } catch (JAXBException e) {
@@ -60,7 +42,6 @@ public class BpsimParserService implements BpsimParser {
         }
 
         try {
-            // 2. Загружаем XSD из classpath
             URL xsdUrl = getClass().getClassLoader().getResource(XSD_RESOURCE_PATH);
             if (xsdUrl == null) {
                 throw new IllegalStateException(
@@ -76,36 +57,19 @@ public class BpsimParserService implements BpsimParser {
                     "Не удалось скомпилировать XSD-схему BPSim", e);
         }
 
-        log.info("BpsimParserService инициализирован успешно ✅");
+        log.info("BpsimParserService инициализирован успешно");
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    //  Публичный API
-    // ──────────────────────────────────────────────────────────────────────
-
-    /**
-     * Парсит входящий XML-поток BPSim с предварительной
-     * строгой XSD-валидацией.
-     *
-     * <p>Если XML не соответствует схеме BPSim.xsd — выбрасывается
-     * {@link BpsimValidationException}.</p>
-     *
-     * @param xmlStream входной поток с XML-документом BPSim
-     * @return десериализованный {@link BPSimData}
-     * @throws BpsimValidationException если XML не прошёл XSD-валидацию
-     */
     @Override
     public BPSimData parseBpsim(InputStream xmlStream) {
-        log.info("Начинаем парсинг BPSim XML...");
+        log.info("Начинаем парсинг BPSim XML (МЯГКИЙ РЕЖИМ)...");
 
         try {
-            // Unmarshaller НЕ thread-safe — создаём новый на каждый вызов
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            // unmarshaller.setSchema(bpsimSchema);
+            log.warn("ВНИМАНИЕ: Строгая XSD-валидация отключена! Парсер игнорирует некритичные отклонения от стандарта.");
 
-            // Подключаем строгую XSD-валидацию
-            unmarshaller.setSchema(bpsimSchema);
-
-            // Парсим с валидацией
+            // Парсим без валидации (сработает как и на стороннем ресурсе)
             Object result = unmarshaller.unmarshal(xmlStream);
 
             if (!(result instanceof BPSimData)) {
@@ -115,18 +79,17 @@ public class BpsimParserService implements BpsimParser {
             }
 
             BPSimData data = (BPSimData) result;
-            log.info("Парсинг завершён успешно ✅ Сценариев: {}",
+            log.info("Парсинг завершён успешно Сценариев: {}",
                     data.getScenario().size());
 
             return data;
 
         } catch (JAXBException e) {
-            // JAXBException при включённой Schema => ошибка валидации XSD
-            String msg = "XML не прошёл XSD-валидацию BPSim";
+            String msg = "Ошибка при десериализации BPSim XML";
             if (e.getLinkedException() != null) {
                 msg += ": " + e.getLinkedException().getMessage();
             }
-            log.error("Ошибка валидации ❌ {}", msg);
+            log.error("Ошибка парсинга {}", msg);
             throw new BpsimValidationException(msg, e);
         }
     }

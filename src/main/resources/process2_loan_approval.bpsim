@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpsim:BPSimData xmlns:bpsim="http://www.bpsim.org/schemas/2.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.bpsim.org/schemas/2.0 xsd/BPSim.xsd">
+    <bpsim:Scenario id="Scenario_Loan" name="Процесс одобрения ипотеки" author="Иван Салухов" version="1.2">
+        <bpsim:ScenarioParameters baseTimeUnit="day" baseCurrencyUnit="RUB" replication="5" traceOutput="false" />
+        <!-- Закомментируем CalendarParameters так как их нет в DTO
+        <bpsim:CalendarParameters id="Cal_BankHours">
+            <bpsim:CalendarId>Bank_Working_Hours</bpsim:CalendarId>
+        </bpsim:CalendarParameters>
+        -->
+        <bpsim:ElementParameters id="Elem_Underwriting" elementRef="Task_Underwriting">
+            <bpsim:TimeParameters>
+                <bpsim:ProcessingTime>
+                    <bpsim:NormalDistribution mean="3.0" standardDeviation="1.0"/>
+                </bpsim:ProcessingTime>
+            </bpsim:TimeParameters>
+            <bpsim:CostParameters>
+                <bpsim:UnitCost>
+                    <bpsim:FloatingParameter value="5000.0"/>
+                </bpsim:UnitCost>
+            </bpsim:CostParameters>
+        </bpsim:ElementParameters>
+    </bpsim:Scenario>
+</bpsim:BPSimData>
